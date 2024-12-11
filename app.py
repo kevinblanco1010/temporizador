@@ -32,10 +32,11 @@ def temporizador():
     if tiempo_restante.total_seconds() <= 0:
         texto = "¡Tiempo terminado!"
     else:
-        dias = tiempo_restante.days
+        # Calculamos solo las horas, minutos y segundos restantes
         horas, resto = divmod(tiempo_restante.seconds, 3600)
         minutos, segundos = divmod(resto, 60)
-        texto = f"{dias} días, {horas:02}:{minutos:02}:{segundos:02}"
+        # No mostramos los días, solo el tiempo en formato HH:MM:SS
+        texto = f"{horas:02}:{minutos:02}:{segundos:02}"
 
     # Crear la imagen
     ancho, alto = 800, 400

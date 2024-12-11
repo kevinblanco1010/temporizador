@@ -1,49 +1,54 @@
 from flask import Flask, request, send_file
-from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
+from datetime import datetime
 import io
 
 app = Flask(__name__)
 
 @app.route('/temporizador')
 def temporizador():
-    # Obtiene la fecha y hora de fin del temporizador desde la URL
-    fecha_fin = request.args.get('fin')  # Ejemplo: "2023-12-31T23:59:59"
+    # Obtener la fecha de fin desde los parámetros
+    fecha_fin = request.args.get('fin')
     if not fecha_fin:
         return "Por favor, proporciona una fecha de fin con el parámetro 'fin'.", 400
 
     try:
         fecha_fin = datetime.fromisoformat(fecha_fin)
     except ValueError:
-        return "Formato de fecha no válido. Usa ISO 8601 (ej. 2023-12-31T23:59:59).", 400
+        return "Formato de fecha incorrecto. Usa 'YYYY-MM-DDTHH:MM:SS'.", 400
 
-    # Calcula el tiempo restante
-    ahora = datetime.utcnow()
+    # Calcular el tiempo restante
+    ahora = datetime.now()
     tiempo_restante = fecha_fin - ahora
-
     if tiempo_restante.total_seconds() <= 0:
-        mensaje = "¡Tiempo terminado!"
+        texto = "¡Tiempo terminado!"
     else:
         dias = tiempo_restante.days
         horas, resto = divmod(tiempo_restante.seconds, 3600)
         minutos, segundos = divmod(resto, 60)
-        mensaje = f"{dias}d {horas}h {minutos}m {segundos}s"
+        texto = f"{dias} días, {horas:02}:{minutos:02}:{segundos:02}"
 
-    # Crea una imagen con Pillow
-    ancho, alto = 400, 200
+    # Crear la imagen
+    ancho, alto = 800, 400
     imagen = Image.new('RGB', (ancho, alto), color=(255, 255, 255))
     draw = ImageDraw.Draw(imagen)
 
-    # Añade el texto del temporizador
-    fuente = ImageFont.load_default()
-    draw.text((10, 90), mensaje, font=fuente, fill=(0, 0, 0))
+    # Fuente personalizada
+    try:
+        fuente = ImageFont.truetype("arial.ttf", 50)  # Asegúrate de que esta fuente exista
+    except IOError:
+        fuente = ImageFont.load_default()
 
-    # Convierte la imagen a un archivo en memoria
+    # Calcular posición del texto para centrarlo
+    texto_ancho, texto_alto = draw.textsize(texto, font=fuente)
+    x = (ancho - texto_ancho) // 2
+    y = (alto - texto_alto) // 2
+
+    # Dibujar el texto
+    draw.text((x, y), texto, font=fuente, fill=(0, 0, 0))
+
+    # Enviar la imagen como respuesta
     buffer = io.BytesIO()
     imagen.save(buffer, format="PNG")
     buffer.seek(0)
-
     return send_file(buffer, mimetype='image/png')
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)

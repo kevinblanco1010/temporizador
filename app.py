@@ -1,6 +1,6 @@
 from flask import Flask, request, send_file
 from PIL import Image, ImageDraw, ImageFont
-from datetime import datetime
+from datetime import datetime, timedelta
 import io
 import os
 
@@ -14,13 +14,17 @@ def home():
 def temporizador():
     # Obtener la fecha de fin desde los parámetros
     fecha_fin = request.args.get('fin')
+    
     if not fecha_fin:
-        return "Por favor, proporciona una fecha de fin con el parámetro 'fin'.", 400
-
-    try:
-        fecha_fin = datetime.fromisoformat(fecha_fin)
-    except ValueError:
-        return "Formato de fecha incorrecto. Usa 'YYYY-MM-DDTHH:MM:SS'.", 400
+        # Si no se proporciona una fecha, por defecto, se configura para el fin de mañana a las 00:00:00
+        ahora = datetime.now()
+        # Establecer fecha_fin como el inicio del día siguiente
+        fecha_fin = (ahora + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    else:
+        try:
+            fecha_fin = datetime.fromisoformat(fecha_fin)
+        except ValueError:
+            return "Formato de fecha incorrecto. Usa 'YYYY-MM-DDTHH:MM:SS'.", 400
 
     # Calcular el tiempo restante
     ahora = datetime.now()

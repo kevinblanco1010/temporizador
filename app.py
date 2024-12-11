@@ -41,7 +41,9 @@ def temporizador():
         fuente = ImageFont.load_default()
 
     # Calcular posición del texto para centrarlo
-    texto_ancho, texto_alto = draw.textsize(texto, font=fuente)
+    texto_bounding_box = draw.textbbox((0, 0), texto, font=fuente)
+    texto_ancho = texto_bounding_box[2] - texto_bounding_box[0]
+    texto_alto = texto_bounding_box[3] - texto_bounding_box[1]
     x = (ancho - texto_ancho) // 2
     y = (alto - texto_alto) // 2
 

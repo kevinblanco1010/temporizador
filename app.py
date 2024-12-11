@@ -2,6 +2,7 @@ from flask import Flask, request, send_file
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
 import io
+import os  # Para manejar variables de entorno
 
 app = Flask(__name__)
 
@@ -52,3 +53,9 @@ def temporizador():
     imagen.save(buffer, format="PNG")
     buffer.seek(0)
     return send_file(buffer, mimetype='image/png')
+
+if __name__ == '__main__':
+    # Obtén el puerto de la variable de entorno (usado por Render) o usa 5000 como predeterminado
+    port = int(os.environ.get('PORT', 5000))
+    # Ejecuta la aplicación en 0.0.0.0 para que sea accesible externamente
+    app.run(host='0.0.0.0', port=port)

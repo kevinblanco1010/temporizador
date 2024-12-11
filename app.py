@@ -2,9 +2,13 @@ from flask import Flask, request, send_file
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
 import io
-import os  # Para manejar variables de entorno
+import os
 
 app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Bienvenido a la aplicación del temporizador. Usa /temporizador con el parámetro 'fin' para ver el temporizador."
 
 @app.route('/temporizador')
 def temporizador():
@@ -41,9 +45,8 @@ def temporizador():
         fuente = ImageFont.load_default()
 
     # Calcular posición del texto para centrarlo
-    texto_bounding_box = draw.textbbox((0, 0), texto, font=fuente)
-    texto_ancho = texto_bounding_box[2] - texto_bounding_box[0]
-    texto_alto = texto_bounding_box[3] - texto_bounding_box[1]
+    bbox = draw.textbbox((0, 0), texto, font=fuente)
+    texto_ancho, texto_alto = bbox[2] - bbox[0], bbox[3] - bbox[1]
     x = (ancho - texto_ancho) // 2
     y = (alto - texto_alto) // 2
 
